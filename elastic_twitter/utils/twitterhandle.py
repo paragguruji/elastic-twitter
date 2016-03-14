@@ -61,7 +61,10 @@ class TwitterHandle:
         """
         try:
             auth_data = json.loads(open(self.auth_path).read())       
-        except IOError:
+        except IOError as ioe:
+            self.logger.error(ioe.message, 
+                              exc_info=True, 
+                              extra={'auth_path': self.auth_path})
             return None
         except Exception as ie:
             self.logger.error(ie.message, 
@@ -76,7 +79,9 @@ class TwitterHandle:
             if not (oauth_token is None or oauth_token_secret is None):
                 auth_data['oauth_token'] = oauth_token
                 auth_data['oauth_token_secret'] = oauth_token_secret
-            return Twython(**auth_data[app_name])
+            twython_obj = Twython(**auth_data[app_name])
+            self.logger.info("twython object created:" + twython_obj.__repr__())            
+            return twython_obj
         except TwythonError as e:
             self.logger.error(e.message + "\nCheck Twython's init signature \
             vs config data in data/twython_auth.json for correct keyword-args",
